@@ -1,18 +1,22 @@
 <template>
   <div>
-    <div class="d-flex gap-2">
-      <FilterComponent :filterName="'Parks'" :color="'#084298'" v-model="filters.parks" @change="updateMapLayers" />
-      <FilterComponent :filterName="'Gardens'" :color="'#084298'" v-model="filters.gardens" @change="updateMapLayers" />
-      <FilterComponent :filterName="'Playgrounds'" :color="'#084298'" v-model="filters.playgrounds" @change="updateMapLayers" />
-      <FilterComponent :filterName="'Pitches'" :color="'#084298'" v-model="filters.pitches" @change="updateMapLayers" />
-      <FilterComponent :filterName="'Forests'" :color="'#084298'" v-model="filters.forests" @change="updateMapLayers" />
-      <FilterComponent :filterName="'Woods'" :color="'#084298'" v-model="filters.woods" @change="updateMapLayers" />
-      <FilterComponent :filterName="'Trees'" :color="'#084298'" v-model="filters.trees" @change="updateMapLayers" />
-      <FilterComponent :filterName="'Deciduous Trees'" :color="'#084298'" v-model="filters.deciduous" @change="updateMapLayers" />
-      <FilterComponent :filterName="'Broadleaved Trees'" :color="'#084298'" v-model="filters.broadleaved" @change="updateMapLayers" />
-      <FilterComponent :filterName="'Needleleaved Trees'" :color="'#084298'" v-model="filters.needleleaved" @change="updateMapLayers" />
+    <div class="position-relative">
+      <div class="position-absolute z-1 top-0 start-0 p-3">
+        <div class="d-flex flex-wrap gap-2">
+          <FilterComponent :filterName="'Parcs'" :color="'#107026'" :icon="'bi bi-bounding-box'" v-model="filters.parks" @change="updateMapLayers" />
+          <FilterComponent :filterName="'Jardins'" :color="'#ff8c20'" :icon="'bi bi-flower1'" v-model="filters.gardens" @change="updateMapLayers" />
+          <FilterComponent :filterName="'Terrains de jeux'" :color="'#0451d3'" :icon="'bi bi-dice-1-fill'" v-model="filters.playgrounds" @change="updateMapLayers" />
+          <FilterComponent :filterName="'Emplacements'" :color="'#010a64'" :icon="'bi bi-geo-alt-fill'" v-model="filters.pitches" @change="updateMapLayers" />
+          <FilterComponent :filterName="'Forêts'" :color="'#1a9a7a'" :icon="'bi bi-signpost-2-fill'" v-model="filters.forests" @change="updateMapLayers" />
+          <FilterComponent :filterName="'Bois'" :color="'#904f0b'" :icon="'bi bi-signpost-fill'" v-model="filters.woods" @change="updateMapLayers" />
+          <FilterComponent :filterName="'Arbres'" :color="'#049004'" :icon="'bi bi-tree-fill'" v-model="filters.trees" @change="updateMapLayers" />
+          <FilterComponent :filterName="'Arbres à feuilles caduques'" :color="'#049004'" v-model="filters.deciduous" @change="updateMapLayers" />
+          <FilterComponent :filterName="'Arbres à feuilles larges'" :color="'#049004'" v-model="filters.broadleaved" @change="updateMapLayers" />
+          <FilterComponent :filterName="'Arbres à feuilles d\'aiguilles'" :color="'#049004'" v-model="filters.needleleaved" @change="updateMapLayers" />
+        </div>
+      </div>
+      <div id="map" style="height: 100vh;"></div>
     </div>
-    <div id="map"></div>
   </div>
 </template>
 
@@ -59,12 +63,12 @@ export default {
 
         this.map = new mapboxgl.Map({
           container: 'map',
-          style: 'mapbox://styles/mapbox/light-v10',
+          style: 'mapbox://styles/philipleo/cm37lqs4w00gd01pd29tg4txb',
           center: [2.3522, 48.8566],
           zoom: 12,
         });
 
-        this.map.addControl(new mapboxgl.NavigationControl());
+        this.map.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
 
         this.map.on('load', () => {
           this.updateMapLayers();
@@ -136,7 +140,7 @@ export default {
           source: 'parksSource',
           layout: {},
           paint: {
-            'fill-color': '#008000',
+            'fill-color': '#107026',
             'fill-opacity': 0.5,
           },
         });
@@ -159,7 +163,7 @@ export default {
           source: 'gardensSource',
           layout: {},
           paint: {
-            'fill-color': '#FFD700',
+            'fill-color': '#ff8c20',
             'fill-opacity': 0.5,
           },
         });
@@ -182,7 +186,7 @@ export default {
           source: 'playgroundsSource',
           layout: {},
           paint: {
-            'fill-color': '#FF4500',
+            'fill-color': '#0451d3',
             'fill-opacity': 0.5,
           },
         });
@@ -205,7 +209,7 @@ export default {
           source: 'pitchesSource',
           layout: {},
           paint: {
-            'fill-color': '#1E90FF',
+            'fill-color': '#010a64',
             'fill-opacity': 0.5,
           },
         });
@@ -228,7 +232,7 @@ export default {
           source: 'forestsSource',
           layout: {},
           paint: {
-            'fill-color': '#228B22',
+            'fill-color': '#1a9a7a',
             'fill-opacity': 0.5,
           },
         });
@@ -289,7 +293,7 @@ export default {
           source: 'treesSource',
           filter: ['has', 'point_count'],
           paint: {
-            'circle-color': '#51bbd6',
+            'circle-color': '#049004',
             'circle-radius': [
               'step',
               ['get', 'point_count'],
@@ -320,8 +324,8 @@ export default {
           source: 'treesSource',
           filter: ['!', ['has', 'point_count']],
           paint: {
-            'circle-color': '#00FF00',
-            'circle-radius': 3,
+            'circle-color': '#049004',
+            'circle-radius': 10,
           },
         });
       }

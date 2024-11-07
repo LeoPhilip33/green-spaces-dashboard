@@ -1,10 +1,11 @@
 <template>
   <button
-    class="container-filter p-2 border rounded"
+    class="container-filter d-flex gap-2 align-items-center shadow-sm p-2 border rounded-pill"
     :class="{ active: isActive }"
     @click="toggleActive"
     :style="{ backgroundColor: isActive ? color : '' }"
   >
+    <i :class="icon"></i>
     <p class="mb-0">{{ filterName }}</p>
   </button>
 </template>
@@ -24,6 +25,9 @@ export default {
     modelValue: {
       type: Boolean,
       required: true,
+    },
+    icon: {
+      type: String,
     },
   },
   data() {
@@ -47,9 +51,12 @@ export default {
 </script>
 
 <style scoped>
-.container-filter {
+.container-filter {    
+  transition: 0.2s;
+  
   &:hover {
-    background-color: red;
+    transform: scale(1.05);
+    transition: 0.2s;
   }
 
   &.active {
