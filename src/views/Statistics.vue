@@ -1,19 +1,26 @@
 <template>
-    <div>
-        <h1>Statistics</h1>
-        <p>Total Parks: {{ statistics.totalParks }}</p>
-        <p>Total Gardens: {{ statistics.totalGardens }}</p>
-        <p>Total Playgrounds: {{ statistics.totalPlaygrounds }}</p>
-        <p>Total Pitches: {{ statistics.totalPitches }}</p>
-        <p>Total Forests: {{ statistics.totalForests }}</p>
-        <p>Total Woods: {{ statistics.totalWoods }}</p>
-        <p>Total Trees: {{ statistics.totalTrees }}</p>
-        <p>Percentage of Deciduous Trees: {{ statistics.percentageDeciduous }}%</p>
-        <p>Percentage of Broadleaved Trees: {{ statistics.percentageBroadleaved }}%</p>
-        <p>Percentage of Needleleaved Trees: {{ statistics.percentageNeedleleaved }}%</p>
+  <div class="container mt-4">
+    <div class="row">
+      <div class="col-md-4 mb-4" v-for="(value, key) in formattedStatistics" :key="key">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">{{ key }}</h5>
+            <p class="card-text">{{ value }}</p>
+          </div>
+        </div>
+      </div>
     </div>
-
-    <StatisticsChart :statistics="statistics" />
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Statistics Chart</h5>
+            <StatisticsChart :statistics="statistics" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -27,20 +34,7 @@ export default {
   },
   data() {
     return {
-      map: null,
       geojsonData: null,
-      filters: {
-        parks: false,
-        gardens: false,
-        playgrounds: false,
-        pitches: false,
-        forests: false,
-        woods: false,
-        trees: false,
-        deciduous: false,
-        broadleaved: false,
-        needleleaved: false,
-      },
       statistics: {
         totalParks: 0,
         totalGardens: 0,
@@ -54,6 +48,22 @@ export default {
         percentageNeedleleaved: 0,
       },
     };
+  },
+  computed: {
+    formattedStatistics() {
+      return {
+        'Total Parks': this.statistics.totalParks,
+        'Total Gardens': this.statistics.totalGardens,
+        'Total Playgrounds': this.statistics.totalPlaygrounds,
+        'Total Pitches': this.statistics.totalPitches,
+        'Total Forests': this.statistics.totalForests,
+        'Total Woods': this.statistics.totalWoods,
+        'Total Trees': this.statistics.totalTrees,
+        'Percentage of Deciduous Trees': `${this.statistics.percentageDeciduous}%`,
+        'Percentage of Broadleaved Trees': `${this.statistics.percentageBroadleaved}%`,
+        'Percentage of Needleleaved Trees': `${this.statistics.percentageNeedleleaved}%`,
+      };
+    },
   },
   mounted() {
     this.loadGeojsonData();
@@ -98,8 +108,12 @@ export default {
       this.statistics.percentageBroadleaved = ((broadleavedTrees / trees) * 100).toFixed(2);
       this.statistics.percentageNeedleleaved = ((needleleavedTrees / trees) * 100).toFixed(2);
     },
-  }
+  },
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.card {
+  margin-bottom: 1rem;
+}
+</style>
