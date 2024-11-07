@@ -1,54 +1,18 @@
 <template>
   <div>
-    <h1>Home</h1>
-    <p>Welcome to the Home page!</p>
-    <div>
-      <label>
-        <input type="checkbox" v-model="filters.parks" @change="updateMapLayers"> Parks
-      </label>
-      <label>
-        <input type="checkbox" v-model="filters.gardens" @change="updateMapLayers"> Gardens
-      </label>
-      <label>
-        <input type="checkbox" v-model="filters.playgrounds" @change="updateMapLayers"> Playgrounds
-      </label>
-      <label>
-        <input type="checkbox" v-model="filters.pitches" @change="updateMapLayers"> Pitches
-      </label>
-      <label>
-        <input type="checkbox" v-model="filters.forests" @change="updateMapLayers"> Forests
-      </label>
-      <label>
-        <input type="checkbox" v-model="filters.woods" @change="updateMapLayers"> Woods
-      </label>
-      <label>
-        <input type="checkbox" v-model="filters.trees" @change="updateMapLayers"> Trees
-      </label>
-      <label>
-        <input type="checkbox" v-model="filters.deciduous" @change="updateMapLayers"> Deciduous Trees
-      </label>
-      <label>
-        <input type="checkbox" v-model="filters.broadleaved" @change="updateMapLayers"> Broadleaved Trees
-      </label>
-      <label>
-        <input type="checkbox" v-model="filters.needleleaved" @change="updateMapLayers"> Needleleaved Trees
-      </label>
+    <div class="d-flex gap-2">
+      <FilterComponent :filterName="'Parks'" :color="'#084298'" v-model="filters.parks" @change="updateMapLayers" />
+      <FilterComponent :filterName="'Gardens'" :color="'#084298'" v-model="filters.gardens" @change="updateMapLayers" />
+      <FilterComponent :filterName="'Playgrounds'" :color="'#084298'" v-model="filters.playgrounds" @change="updateMapLayers" />
+      <FilterComponent :filterName="'Pitches'" :color="'#084298'" v-model="filters.pitches" @change="updateMapLayers" />
+      <FilterComponent :filterName="'Forests'" :color="'#084298'" v-model="filters.forests" @change="updateMapLayers" />
+      <FilterComponent :filterName="'Woods'" :color="'#084298'" v-model="filters.woods" @change="updateMapLayers" />
+      <FilterComponent :filterName="'Trees'" :color="'#084298'" v-model="filters.trees" @change="updateMapLayers" />
+      <FilterComponent :filterName="'Deciduous Trees'" :color="'#084298'" v-model="filters.deciduous" @change="updateMapLayers" />
+      <FilterComponent :filterName="'Broadleaved Trees'" :color="'#084298'" v-model="filters.broadleaved" @change="updateMapLayers" />
+      <FilterComponent :filterName="'Needleleaved Trees'" :color="'#084298'" v-model="filters.needleleaved" @change="updateMapLayers" />
     </div>
-    <div id="map" style="height: 500px; width: 100%;"></div>
-    <div>
-      <h2>Statistics</h2>
-      <p>Total Parks: {{ statistics.totalParks }}</p>
-      <p>Total Gardens: {{ statistics.totalGardens }}</p>
-      <p>Total Playgrounds: {{ statistics.totalPlaygrounds }}</p>
-      <p>Total Pitches: {{ statistics.totalPitches }}</p>
-      <p>Total Forests: {{ statistics.totalForests }}</p>
-      <p>Total Woods: {{ statistics.totalWoods }}</p>
-      <p>Total Trees: {{ statistics.totalTrees }}</p>
-      <p>Percentage of Deciduous Trees: {{ statistics.percentageDeciduous }}%</p>
-      <p>Percentage of Broadleaved Trees: {{ statistics.percentageBroadleaved }}%</p>
-      <p>Percentage of Needleleaved Trees: {{ statistics.percentageNeedleleaved }}%</p>
-    </div>
-    <StatisticsChart :statistics="statistics" />
+    <div id="map"></div>
   </div>
 </template>
 
@@ -56,40 +20,26 @@
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import axios from 'axios';
-import StatisticsChart from '@/components/StatisticsChart.vue';
+import FilterComponent from '@/components/FilterComponent.vue';
 
 export default {
   name: 'HomePage',
   components: {
-    StatisticsChart,
+    FilterComponent
   },
   data() {
     return {
-      map: null,
-      geojsonData: [],
       filters: {
-        parks: true,
-        gardens: true,
-        playgrounds: true,
-        pitches: true,
-        forests: true,
-        woods: true,
-        trees: true,
+        parks: false,
+        gardens: false,
+        playgrounds: false,
+        pitches: false,
+        forests: false,
+        woods: false,
+        trees: false,
         deciduous: false,
         broadleaved: false,
         needleleaved: false,
-      },
-      statistics: {
-        totalParks: 0,
-        totalGardens: 0,
-        totalPlaygrounds: 0,
-        totalPitches: 0,
-        totalForests: 0,
-        totalWoods: 0,
-        totalTrees: 0,
-        percentageDeciduous: 0,
-        percentageBroadleaved: 0,
-        percentageNeedleleaved: 0,
       },
     };
   },
@@ -106,8 +56,6 @@ export default {
     Promise.all(geojsonPromises)
       .then(responses => {
         this.geojsonData = responses.map(response => response.data);
-
-        this.calculateStatistics();
 
         this.map = new mapboxgl.Map({
           container: 'map',
@@ -155,29 +103,6 @@ export default {
       });
   },
   methods: {
-    calculateStatistics() {
-      const parks = this.geojsonData[0].features.filter(feature => feature.properties.leisure === 'park').length;
-      const gardens = this.geojsonData[0].features.filter(feature => feature.properties.leisure === 'garden').length;
-      const playgrounds = this.geojsonData[0].features.filter(feature => feature.properties.leisure === 'playground').length;
-      const pitches = this.geojsonData[0].features.filter(feature => feature.properties.leisure === 'pitch').length;
-      const forests = this.geojsonData[0].features.filter(feature => feature.properties.landuse === 'forest').length;
-      const woods = this.geojsonData[0].features.filter(feature => feature.properties.natural === 'wood').length;
-      const trees = this.geojsonData[1].features.length;
-      const deciduousTrees = this.geojsonData[1].features.filter(feature => feature.properties.leaf_cycle === 'deciduous').length;
-      const broadleavedTrees = this.geojsonData[1].features.filter(feature => feature.properties.leaf_type === 'broadleaved').length;
-      const needleleavedTrees = this.geojsonData[1].features.filter(feature => feature.properties.leaf_type === 'needleleaved').length;
-
-      this.statistics.totalParks = parks;
-      this.statistics.totalGardens = gardens;
-      this.statistics.totalPlaygrounds = playgrounds;
-      this.statistics.totalPitches = pitches;
-      this.statistics.totalForests = forests;
-      this.statistics.totalWoods = woods;
-      this.statistics.totalTrees = trees;
-      this.statistics.percentageDeciduous = ((deciduousTrees / trees) * 100).toFixed(2);
-      this.statistics.percentageBroadleaved = ((broadleavedTrees / trees) * 100).toFixed(2);
-      this.statistics.percentageNeedleleaved = ((needleleavedTrees / trees) * 100).toFixed(2);
-    },
     updateMapLayers() {
       const layers = ['parksLayer', 'gardensLayer', 'playgroundsLayer', 'pitchesLayer', 'forestsLayer', 'woodsLayer', 'clusters', 'cluster-count', 'unclustered-point'];
       const sources = ['parksSource', 'gardensSource', 'playgroundsSource', 'pitchesSource', 'forestsSource', 'woodsSource', 'treesSource'];
@@ -430,9 +355,9 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 #map {
-  height: 500px;
+  height: 100vh;
   width: 100%;
 }
 </style>
