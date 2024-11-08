@@ -53,6 +53,7 @@ export default {
 <style scoped>
 .container-filter {    
   transition: 0.2s;
+  height: fit-content;
   
   &:hover {
     transform: scale(1.05);
