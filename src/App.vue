@@ -23,6 +23,6 @@ export default {
 @import 'bootstrap-icons/font/bootstrap-icons.css';
 
 .app-content{
-  margin-left: 10rem;
+  margin-left: 7rem;
 }
 </style>

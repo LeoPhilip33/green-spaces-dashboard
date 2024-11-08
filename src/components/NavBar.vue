@@ -1,23 +1,20 @@
 <template>
-  <nav class="navbar position-fixed navbar-expand-lg navbar-light bg-light flex-column vh-100">
-    <a class="navbar-brand" href="#">
-      <img src="../assets/logo.png" class="d-inline-block align-top" alt="">
+  <nav class="d-flex justify-content-between flex-column position-fixed vh-100">
+    <a class="w-100 mr-0 ml-0" href="/">
+      <img src="../assets/logo.png" alt="Logo netcarbon">
     </a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav flex-column">
-        <li class="nav-item">
-          <router-link class="nav-link" to="/" exact>Carte</router-link>
-        </li>
-        <li class="nav-item">
-          <router-link class="nav-link" to="/statistics">Statistics</router-link>
-        </li>
-      </ul>
+    <div class="d-flex flex-column gap-3">
+      <router-link to="/" class="d-flex flex-column align-items-center">
+        <i class="bi bi-map-fill"></i>
+        <p>Carte</p>
+      </router-link>
+      <router-link to="/statistics" class="d-flex flex-column align-items-center">
+        <i class="bi bi-bar-chart-fill "></i>
+        <p>Statistics</p>
+      </router-link>
     </div>
-    <small class="mt-auto p-3 text-center">
-      <p class="mb-0">philipleopro@mail.com</p>
+    <small class="p-3 text-center">
+      <p class="mb-0">Philip Léo</p>
       <p class="mb-0">06.37.25.99.14</p>
     </small>
   </nav>
@@ -30,20 +27,30 @@ export default {
 </script>
 
 <style scoped>
-.navbar {
-  width: 10rem;
+nav {
+  width: 7rem;
+  border-right: 0.1rem solid #e6e6e6;
+
+  img {
+    width: inherit;
+  }
 }
 
 .navbar-brand img {
-  width: 100px;
+  width: inherit;
+}
+
+small {
+  font-size: 0.8em;
 }
 
 .router-link-active {
   font-weight: bold;
-  color: #007bff;
+  color: #7ba954;
 }
 
-.mt-auto {
-  margin-top: auto;
+a {
+  color: black;
+  text-decoration: none;
 }
 </style>
