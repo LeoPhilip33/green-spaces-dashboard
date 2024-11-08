@@ -3,19 +3,19 @@
     <div class="position-relative">
       <div class="position-absolute z-1 top-0 start-0 p-3">
         <div class="d-flex flex-wrap gap-2">
-          <FilterComponent :filterName="'Parcs'" :color="'#107026'" :icon="'bi bi-bounding-box'" v-model="filters.parks" @change="updateMapLayers" />
-          <FilterComponent :filterName="'Jardins'" :color="'#ff8c20'" :icon="'bi bi-flower1'" v-model="filters.gardens" @change="updateMapLayers" />
-          <FilterComponent :filterName="'Terrains de jeux'" :color="'#0451d3'" :icon="'bi bi-dice-1-fill'" v-model="filters.playgrounds" @change="updateMapLayers" />
-          <FilterComponent :filterName="'Emplacements'" :color="'#010a64'" :icon="'bi bi-geo-alt-fill'" v-model="filters.pitches" @change="updateMapLayers" />
-          <FilterComponent :filterName="'Forêts'" :color="'#1a9a7a'" :icon="'bi bi-signpost-2-fill'" v-model="filters.forests" @change="updateMapLayers" />
-          <FilterComponent :filterName="'Bois'" :color="'#904f0b'" :icon="'bi bi-signpost-fill'" v-model="filters.woods" @change="updateMapLayers" />
-          <FilterComponent :filterName="'Arbres'" :color="'#049004'" :icon="'bi bi-tree-fill'" v-model="filters.trees" @change="updateMapLayers" />
-          <FilterComponent :filterName="'Arbres à feuilles caduques'" :color="'#049004'" v-model="filters.deciduous" @change="updateMapLayers" />
-          <FilterComponent :filterName="'Arbres à feuilles larges'" :color="'#049004'" v-model="filters.broadleaved" @change="updateMapLayers" />
-          <FilterComponent :filterName="'Arbres à feuilles d\'aiguilles'" :color="'#049004'" v-model="filters.needleleaved" @change="updateMapLayers" />
+          <FilterComponent :filterName="'Parcs'" :color="colors.parks" :icon="'bi bi-bounding-box'" v-model="filters.parks" @change="updateMapLayers" />
+          <FilterComponent :filterName="'Jardins'" :color="colors.gardens" :icon="'bi bi-flower1'" v-model="filters.gardens" @change="updateMapLayers" />
+          <FilterComponent :filterName="'Terrains de jeux'" :color="colors.playgrounds" :icon="'bi bi-dice-1-fill'" v-model="filters.playgrounds" @change="updateMapLayers" />
+          <FilterComponent :filterName="'Emplacements'" :color="colors.pitches" :icon="'bi bi-geo-alt-fill'" v-model="filters.pitches" @change="updateMapLayers" />
+          <FilterComponent :filterName="'Forêts'" :color="colors.forests" :icon="'bi bi-signpost-2-fill'" v-model="filters.forests" @change="updateMapLayers" />
+          <FilterComponent :filterName="'Bois'" :color="colors.woods" :icon="'bi bi-signpost-fill'" v-model="filters.woods" @change="updateMapLayers" />
+          <FilterComponent :filterName="'Arbres'" :color="colors.trees" :icon="'bi bi-tree-fill'" v-model="filters.trees" @change="updateMapLayers" />
+          <FilterComponent :filterName="'Arbres à feuilles caduques'" :color="colors.deciduous" v-model="filters.deciduous" @change="updateMapLayers" />
+          <FilterComponent :filterName="'Arbres à feuilles larges'" :color="colors.broadleaved" v-model="filters.broadleaved" @change="updateMapLayers" />
+          <FilterComponent :filterName="'Arbres à feuilles d\'aiguilles'" :color="colors.needleleaved" v-model="filters.needleleaved" @change="updateMapLayers" />
         </div>
       </div>
-      <div id="map" style="height: 100vh;"></div>
+      <div id="map"></div>
     </div>
   </div>
 </template>
@@ -25,6 +25,28 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import axios from 'axios';
 import FilterComponent from '@/components/FilterComponent.vue';
+
+const COLORS = {
+  parks: '#107026',
+  gardens: '#ff8c20',
+  playgrounds: '#0451d3',
+  pitches: '#010a64',
+  forests: '#1a9a7a',
+  woods: '#904f0b',
+  trees: '#049004',
+  deciduous: '#049004',
+  broadleaved: '#049004',
+  needleleaved: '#049004',
+};
+
+const FILTERS = [
+  { key: 'parks', property: 'leisure', value: 'park' },
+  { key: 'gardens', property: 'leisure', value: 'garden' },
+  { key: 'playgrounds', property: 'leisure', value: 'playground' },
+  { key: 'pitches', property: 'leisure', value: 'pitch' },
+  { key: 'forests', property: 'landuse', value: 'forest' },
+  { key: 'woods', property: 'natural', value: 'wood' },
+];
 
 export default {
   name: 'HomePage',
@@ -45,6 +67,7 @@ export default {
         broadleaved: false,
         needleleaved: false,
       },
+      colors: COLORS,
     };
   },
   mounted() {
@@ -60,53 +83,27 @@ export default {
     Promise.all(geojsonPromises)
       .then(responses => {
         this.geojsonData = responses.map(response => response.data);
-
-        this.map = new mapboxgl.Map({
-          container: 'map',
-          style: 'mapbox://styles/philipleo/cm37lqs4w00gd01pd29tg4txb',
-          center: [2.3522, 48.8566],
-          zoom: 12,
-        });
-
-        this.map.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
-
-        this.map.on('load', () => {
-          this.updateMapLayers();
-        });
-
-        this.map.on('click', 'parksLayer', (e) => {
-          this.showPopup(e);
-        });
-
-        this.map.on('click', 'gardensLayer', (e) => {
-          this.showPopup(e);
-        });
-
-        this.map.on('click', 'playgroundsLayer', (e) => {
-          this.showPopup(e);
-        });
-
-        this.map.on('click', 'pitchesLayer', (e) => {
-          this.showPopup(e);
-        });
-
-        this.map.on('click', 'forestsLayer', (e) => {
-          this.showPopup(e);
-        });
-
-        this.map.on('click', 'woodsLayer', (e) => {
-          this.showPopup(e);
-        });
-
-        this.map.on('click', 'unclustered-point', (e) => {
-          this.showPopup(e);
-        });
+        this.initializeMap();
       })
       .catch(error => {
         console.error('Error loading GeoJSON data:', error);
       });
   },
   methods: {
+    initializeMap() {
+      this.map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/light-v10',
+        center: [2.3522, 48.8566],
+        zoom: 12,
+      });
+
+      this.map.on('load', () => {
+        this.updateMapLayers();
+      });
+
+      this.map.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
+    },
     updateMapLayers() {
       const layers = ['parksLayer', 'gardensLayer', 'playgroundsLayer', 'pitchesLayer', 'forestsLayer', 'woodsLayer', 'clusters', 'cluster-count', 'unclustered-point'];
       const sources = ['parksSource', 'gardensSource', 'playgroundsSource', 'pitchesSource', 'forestsSource', 'woodsSource', 'treesSource'];
@@ -123,165 +120,41 @@ export default {
         }
       });
 
-      if (this.filters.parks) {
-        const parksData = {
+      FILTERS.forEach(filter => {
+        this.addSourceAndLayer(filter.key, filter.property, filter.value, this.colors[filter.key]);
+      });
+
+      this.addClusterLayer('trees', this.colors.trees);
+    },
+    addSourceAndLayer(filterKey, propertyKey, propertyValue, color) {
+      if (this.filters[filterKey]) {
+        const data = {
           type: 'FeatureCollection',
-          features: this.geojsonData[0].features.filter(feature => feature.properties.leisure === 'park')
+          features: this.geojsonData[0].features.filter(feature => feature.properties[propertyKey] === propertyValue)
         };
 
-        this.map.addSource('parksSource', {
+        this.map.addSource(`${filterKey}Source`, {
           type: 'geojson',
-          data: parksData,
+          data: data,
         });
 
         this.map.addLayer({
-          id: 'parksLayer',
+          id: `${filterKey}Layer`,
           type: 'fill',
-          source: 'parksSource',
+          source: `${filterKey}Source`,
           layout: {},
           paint: {
-            'fill-color': '#107026',
+            'fill-color': color,
             'fill-opacity': 0.5,
           },
         });
       }
-
-      if (this.filters.gardens) {
-        const gardensData = {
-          type: 'FeatureCollection',
-          features: this.geojsonData[0].features.filter(feature => feature.properties.leisure === 'garden')
-        };
-
-        this.map.addSource('gardensSource', {
-          type: 'geojson',
-          data: gardensData,
-        });
-
-        this.map.addLayer({
-          id: 'gardensLayer',
-          type: 'fill',
-          source: 'gardensSource',
-          layout: {},
-          paint: {
-            'fill-color': '#ff8c20',
-            'fill-opacity': 0.5,
-          },
-        });
-      }
-
-      if (this.filters.playgrounds) {
-        const playgroundsData = {
-          type: 'FeatureCollection',
-          features: this.geojsonData[0].features.filter(feature => feature.properties.leisure === 'playground')
-        };
-
-        this.map.addSource('playgroundsSource', {
-          type: 'geojson',
-          data: playgroundsData,
-        });
-
-        this.map.addLayer({
-          id: 'playgroundsLayer',
-          type: 'fill',
-          source: 'playgroundsSource',
-          layout: {},
-          paint: {
-            'fill-color': '#0451d3',
-            'fill-opacity': 0.5,
-          },
-        });
-      }
-
-      if (this.filters.pitches) {
-        const pitchesData = {
-          type: 'FeatureCollection',
-          features: this.geojsonData[0].features.filter(feature => feature.properties.leisure === 'pitch')
-        };
-
-        this.map.addSource('pitchesSource', {
-          type: 'geojson',
-          data: pitchesData,
-        });
-
-        this.map.addLayer({
-          id: 'pitchesLayer',
-          type: 'fill',
-          source: 'pitchesSource',
-          layout: {},
-          paint: {
-            'fill-color': '#010a64',
-            'fill-opacity': 0.5,
-          },
-        });
-      }
-
-      if (this.filters.forests) {
-        const forestsData = {
-          type: 'FeatureCollection',
-          features: this.geojsonData[0].features.filter(feature => feature.properties.landuse === 'forest')
-        };
-
-        this.map.addSource('forestsSource', {
-          type: 'geojson',
-          data: forestsData,
-        });
-
-        this.map.addLayer({
-          id: 'forestsLayer',
-          type: 'fill',
-          source: 'forestsSource',
-          layout: {},
-          paint: {
-            'fill-color': '#1a9a7a',
-            'fill-opacity': 0.5,
-          },
-        });
-      }
-
-      if (this.filters.woods) {
-        const woodsData = {
-          type: 'FeatureCollection',
-          features: this.geojsonData[0].features.filter(feature => feature.properties.natural === 'wood')
-        };
-
-        this.map.addSource('woodsSource', {
-          type: 'geojson',
-          data: woodsData,
-        });
-
-        this.map.addLayer({
-          id: 'woodsLayer',
-          type: 'fill',
-          source: 'woodsSource',
-          layout: {},
-          paint: {
-            'fill-color': '#8B4513',
-            'fill-opacity': 0.5,
-          },
-        });
-      }
-
-      if (this.filters.trees) {
-        let treesData = this.geojsonData[1].features;
-
-        if (this.filters.deciduous) {
-          treesData = treesData.filter(feature => feature.properties.leaf_cycle === 'deciduous');
-        }
-
-        if (this.filters.broadleaved) {
-          treesData = treesData.filter(feature => feature.properties.leaf_type === 'broadleaved');
-        }
-
-        if (this.filters.needleleaved) {
-          treesData = treesData.filter(feature => feature.properties.leaf_type === 'needleleaved');
-        }
-
+    },
+    addClusterLayer(filterKey, color) {
+      if (this.filters[filterKey]) {
         this.map.addSource('treesSource', {
           type: 'geojson',
-          data: {
-            type: 'FeatureCollection',
-            features: treesData,
-          },
+          data: this.geojsonData[1],
           cluster: true,
           clusterMaxZoom: 14,
           clusterRadius: 50,
@@ -293,7 +166,7 @@ export default {
           source: 'treesSource',
           filter: ['has', 'point_count'],
           paint: {
-            'circle-color': '#049004',
+            'circle-color': color,
             'circle-radius': [
               'step',
               ['get', 'point_count'],
@@ -324,35 +197,10 @@ export default {
           source: 'treesSource',
           filter: ['!', ['has', 'point_count']],
           paint: {
-            'circle-color': '#049004',
-            'circle-radius': 10,
+            'circle-color': '#00FF00',
+            'circle-radius': 3,
           },
         });
-      }
-    },
-    showPopup(e) {
-      const coordinates = e.features[0].geometry.coordinates;
-      const properties = e.features[0].properties;
-
-      let lngLat;
-      if (Array.isArray(coordinates[0])) {
-        lngLat = coordinates[0][0];
-      } else {
-        lngLat = coordinates;
-      }
-
-      if (lngLat.length === 2 && !isNaN(lngLat[0]) && !isNaN(lngLat[1])) {
-        let description = '<strong>Details:</strong><br>';
-        for (const key in properties) {
-          description += `${key}: ${properties[key]}<br>`;
-        }
-
-        new mapboxgl.Popup()
-          .setLngLat(lngLat)
-          .setHTML(description)
-          .addTo(this.map);
-      } else {
-        console.error('Invalid coordinates:', lngLat);
       }
     },
   },
