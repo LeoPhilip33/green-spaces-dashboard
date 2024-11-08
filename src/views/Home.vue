@@ -9,6 +9,7 @@
           <FilterComponent :filterName="'Emplacements'" :color="colors.pitches" :icon="'bi bi-geo-alt-fill'" v-model="filters.pitches" @change="updateMapLayers" />
           <FilterComponent :filterName="'Forêts'" :color="colors.forests" :icon="'bi bi-signpost-2-fill'" v-model="filters.forests" @change="updateMapLayers" />
           <FilterComponent :filterName="'Bois'" :color="colors.woods" :icon="'bi bi-signpost-fill'" v-model="filters.woods" @change="updateMapLayers" />
+          <FilterComponent :filterName="'Carte thermique'" :color="colors.heatzones" :icon="'bi bi-thermometer-half'" v-model="filters.heatzones" @change="updateMapLayers" />
           <FilterComponent :filterName="'Arbres'" :color="colors.trees" :icon="'bi bi-tree-fill'" v-model="filters.trees" @change="updateMapLayers" />
           <div v-if="filters.trees" class="ms-3">
             <FilterComponent :filterName="'Arbres à feuilles caduques'" :color="colors.deciduous" v-model="filters.deciduous" @change="updateMapLayers" />
@@ -47,9 +48,11 @@ export default {
         deciduous: false,
         broadleaved: false,
         needleleaved: false,
+        heatzones: false,
       },
       colors: COLORS,
       geojsonData: null,
+      map: null,
     };
   },
   mounted() {
@@ -57,7 +60,8 @@ export default {
 
     const geojsonFiles = [
       '/geojson/green_spaces_paris.geojson',
-      '/geojson/trees_paris.geojson'
+      '/geojson/trees_paris.geojson',
+      '/geojson/lst_paris_2022.geojson'
     ];
 
     const geojsonPromises = geojsonFiles.map(file => axios.get(file));
@@ -84,11 +88,41 @@ export default {
               this.showPopup(e);
             });
           });
+
+          if (this.filters.heatzones) {
+          this.map.addSource('heatzonesSource', {
+            type: 'geojson',
+            data: this.geojsonData[2],
+          });
+
+          this.map.addLayer({
+            id: 'heatzonesLayer',
+            type: 'heatzones',
+            source: 'heatzonesSource',
+            paint: {
+              'heatzones-weight': ['interpolate', ['linear'], ['get', 'temperature'], 0, 0, 30, 1],
+              'heatzones-intensity': ['interpolate', ['linear'], ['zoom'], 0, 1, 15, 3],
+              'heatzones-color': [
+                'interpolate',
+                ['linear'],
+                ['heatzones-density'],
+                0, 'rgba(33,102,172,0)',
+                0.2, 'rgb(103,169,207)',
+                0.4, 'rgb(209,229,240)',
+                0.6, 'rgb(253,219,199)',
+                0.8, 'rgb(239,138,98)',
+                1, 'rgb(178,24,43)'
+              ],
+              'heatzones-radius': ['interpolate', ['linear'], ['zoom'], 0, 2, 15, 20],
+              'heatzones-opacity': ['interpolate', ['linear'], ['zoom'], 7, 1, 15, 0]
+            }
+          });
+        }
         });
-            })
-            .catch(error => {
+      })
+      .catch(error => {
         console.error('Error loading GeoJSON data:', error);
-            });
+      });
   },
   methods: {
     updateMapLayers() {
@@ -96,8 +130,8 @@ export default {
         return;
       }
 
-      const layers = ['parksLayer', 'gardensLayer', 'playgroundsLayer', 'pitchesLayer', 'forestsLayer', 'woodsLayer', 'clusters', 'cluster-count', 'unclustered-point'];
-      const sources = ['parksSource', 'gardensSource', 'playgroundsSource', 'pitchesSource', 'forestsSource', 'woodsSource', 'treesSource'];
+      const layers = ['parksLayer', 'gardensLayer', 'playgroundsLayer', 'pitchesLayer', 'forestsLayer', 'woodsLayer', 'clusters', 'cluster-count', 'unclustered-point', 'heatzonesLayer'];
+      const sources = ['parksSource', 'gardensSource', 'playgroundsSource', 'pitchesSource', 'forestsSource', 'woodsSource', 'treesSource', 'heatzonesSource'];
 
       layers.forEach(layer => {
         if (this.map.getLayer(layer)) {
@@ -178,6 +212,36 @@ export default {
             'circle-radius': 10,
           },
         });
+      }
+
+      if (this.filters.heatzones) {
+        this.map.addSource('heatzonesSource', {
+          type: 'geojson',
+          data: this.geojsonData[2],
+        });
+
+        this.map.addLayer({
+          id: 'heatzonesLayer',
+          type: 'heatmap',
+          source: 'heatzonesSource',
+          paint: {
+            'heatmap-weight': ['interpolate', ['linear'], ['get', 'temperature'], 0, 0, 30, 1],
+            'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 0, 1, 15, 3],
+            'heatmap-color': [
+              'interpolate',
+              ['linear'],
+              ['heatmap-density'],
+              0, 'rgba(33,102,172,0)',
+              0.2, 'rgb(103,169,207)',
+              0.4, 'rgb(209,229,240)',
+              0.6, 'rgb(253,219,199)',
+              0.8, 'rgb(239,138,98)',
+              1, 'rgb(178,24,43)'
+            ],
+            'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 2, 15, 20],
+            'heatmap-opacity': ['interpolate', ['linear'], ['zoom'], 7, 1, 15, 0]
+          }
+        });
       } else {
         FILTERS.forEach(filter => {
           if (this.filters[filter.key]) {
@@ -206,31 +270,19 @@ export default {
       }
     },
     showPopup(e) {
-      const coordinates = e.features[0].geometry.coordinates;
-      const properties = e.features[0].properties;
+      const coordinates = e.features[0].geometry.coordinates.slice();
+      const description = e.features[0].properties.description;
 
-      let lngLat;
-      if (Array.isArray(coordinates[0])) {
-        lngLat = coordinates[0][0];
-      } else {
-        lngLat = coordinates;
+      while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+        coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
       }
 
-      if (lngLat.length === 2 && !isNaN(lngLat[0]) && !isNaN(lngLat[1])) {
-        let description = '<strong>Details:</strong><br>';
-        for (const key in properties) {
-          description += `${key}: ${properties[key]}<br>`;
-        }
-
-        new mapboxgl.Popup()
-          .setLngLat(lngLat)
-          .setHTML(description)
-          .addTo(this.map);
-      } else {
-        console.error('Invalid coordinates:', lngLat);
-      }
-    },
-  },
+      new mapboxgl.Popup()
+        .setLngLat(coordinates)
+        .setHTML(description)
+        .addTo(this.map);
+    }
+  }
 };
 </script>
 

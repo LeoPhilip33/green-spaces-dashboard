@@ -9,6 +9,7 @@ export const COLORS = {
     deciduous: '#049004',
     broadleaved: '#049004',
     needleleaved: '#049004',
+    heatzones: '#049004',
 };
 
 export const FILTERS = [
@@ -18,6 +19,7 @@ export const FILTERS = [
     { key: 'pitches', property: 'leisure', value: 'pitch' },
     { key: 'forests', property: 'landuse', value: 'forest' },
     { key: 'woods', property: 'natural', value: 'wood' },
+    { key: 'heatzones', property: 'natural', value: 'heatzone' },
     { key: 'deciduous', property: 'leaf_cycle', value: 'deciduous' },
     { key: 'broadleaved', property: 'leaf_type', value: 'broadleaved' },
     { key: 'needleleaved', property: 'leaf_type', value: 'needleleaved' },
