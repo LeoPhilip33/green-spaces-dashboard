@@ -1,14 +1,12 @@
 <template>
   <div class="container mt-4">
     <div class="row">
-      <div class="col-md-4 mb-4" v-for="(value, key) in formattedStatistics" :key="key">
-        <div class="card">
-          <div class="card-body">
-            <h5 class="card-title">{{ key }}</h5>
-            <p class="card-text">{{ value }}</p>
-          </div>
-        </div>
-      </div>
+      <StatisticCard
+        v-for="(value, key) in formattedStatistics"
+        :key="key"
+        :title="key"
+        :value="value"
+      />
     </div>
     <div class="row">
       <div class="col-12">
@@ -26,11 +24,13 @@
 <script>
 import axios from 'axios';
 import StatisticsChart from '@/components/StatisticsChart.vue';
+import StatisticCard from '@/components/StatisticCard.vue';
 
 export default {
   name: 'StatisticsPage',
   components: {
     StatisticsChart,
+    StatisticCard,
   },
   data() {
     return {
@@ -52,16 +52,16 @@ export default {
   computed: {
     formattedStatistics() {
       return {
-        'Total Parks': this.statistics.totalParks,
-        'Total Gardens': this.statistics.totalGardens,
-        'Total Playgrounds': this.statistics.totalPlaygrounds,
-        'Total Pitches': this.statistics.totalPitches,
-        'Total Forests': this.statistics.totalForests,
-        'Total Woods': this.statistics.totalWoods,
-        'Total Trees': this.statistics.totalTrees,
-        'Percentage of Deciduous Trees': `${this.statistics.percentageDeciduous}%`,
-        'Percentage of Broadleaved Trees': `${this.statistics.percentageBroadleaved}%`,
-        'Percentage of Needleleaved Trees': `${this.statistics.percentageNeedleleaved}%`,
+        'Parcs': this.statistics.totalParks,
+        'Jardins': this.statistics.totalGardens,
+        'Terrains de jeux': this.statistics.totalPlaygrounds,
+        'Terrains': this.statistics.totalPitches,
+        'Forêts': this.statistics.totalForests,
+        'Bois': this.statistics.totalWoods,
+        'Arbres': this.statistics.totalTrees,
+        'Arbres à feuilles caduques': `${this.statistics.percentageDeciduous}%`,
+        'Arbres à feuilles larges': `${this.statistics.percentageBroadleaved}%`,
+        'Arbres à feuilles d\'aiguilles': `${this.statistics.percentageNeedleleaved}%`,
       };
     },
   },

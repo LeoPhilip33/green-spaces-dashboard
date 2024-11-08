@@ -6,7 +6,7 @@
           <FilterComponent :filterName="'Parcs'" :color="colors.parks" :icon="'bi bi-bounding-box'" v-model="filters.parks" @change="updateMapLayers" />
           <FilterComponent :filterName="'Jardins'" :color="colors.gardens" :icon="'bi bi-flower1'" v-model="filters.gardens" @change="updateMapLayers" />
           <FilterComponent :filterName="'Terrains de jeux'" :color="colors.playgrounds" :icon="'bi bi-dice-1-fill'" v-model="filters.playgrounds" @change="updateMapLayers" />
-          <FilterComponent :filterName="'Emplacements'" :color="colors.pitches" :icon="'bi bi-geo-alt-fill'" v-model="filters.pitches" @change="updateMapLayers" />
+          <FilterComponent :filterName="'Terrains'" :color="colors.pitches" :icon="'bi bi-geo-alt-fill'" v-model="filters.pitches" @change="updateMapLayers" />
           <FilterComponent :filterName="'Forêts'" :color="colors.forests" :icon="'bi bi-signpost-2-fill'" v-model="filters.forests" @change="updateMapLayers" />
           <FilterComponent :filterName="'Bois'" :color="colors.woods" :icon="'bi bi-signpost-fill'" v-model="filters.woods" @change="updateMapLayers" />
           <FilterComponent :filterName="'Arbres'" :color="colors.trees" :icon="'bi bi-tree-fill'" v-model="filters.trees" @change="updateMapLayers" />
@@ -25,19 +25,7 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import axios from 'axios';
 import FilterComponent from '@/components/FilterComponent.vue';
-
-const COLORS = {
-  parks: '#107026',
-  gardens: '#ff8c20',
-  playgrounds: '#0451d3',
-  pitches: '#010a64',
-  forests: '#1a9a7a',
-  woods: '#904f0b',
-  trees: '#049004',
-  deciduous: '#049004',
-  broadleaved: '#049004',
-  needleleaved: '#049004',
-};
+import { COLORS } from '@/config.js';
 
 const FILTERS = [
   { key: 'parks', property: 'leisure', value: 'park' },
