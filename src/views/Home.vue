@@ -56,7 +56,7 @@ export default {
     };
   },
   mounted() {
-    mapboxgl.accessToken = 'pk.eyJ1IjoicGhpbGlwbGVvIiwiYSI6ImNtMzc4NGI0bjBldzEybXNmN2ltb2F3ZDEifQ._Zl6AnfQY1xmGDIsTTihMA';
+    mapboxgl.accessToken = 'pk.eyJ1IjoicGhpbGlwbGVvIiwiYSI6ImNtMzc3cGxnajBjdnoydnNjdGM1cnQyZzAifQ.4YpoHC0y-ojSv1Abbr3NBw';
 
     const geojsonFiles = [
       '/geojson/green_spaces_paris.geojson',
