@@ -270,17 +270,29 @@ export default {
       }
     },
     showPopup(e) {
-      const coordinates = e.features[0].geometry.coordinates.slice();
-      const description = e.features[0].properties.description;
+      const coordinates = e.features[0].geometry.coordinates;
+      const properties = e.features[0].properties;
 
-      while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-        coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+      let lngLat;
+      if (Array.isArray(coordinates[0])) {
+        lngLat = coordinates[0][0];
+      } else {
+        lngLat = coordinates;
       }
 
-      new mapboxgl.Popup()
-        .setLngLat(coordinates)
-        .setHTML(description)
-        .addTo(this.map);
+      if (lngLat.length === 2 && !isNaN(lngLat[0]) && !isNaN(lngLat[1])) {
+        let description = '<strong>Details:</strong><br>';
+        for (const key in properties) {
+          description += `${key}: ${properties[key]}<br>`;
+        }
+
+        new mapboxgl.Popup()
+          .setLngLat(lngLat)
+          .setHTML(description)
+          .addTo(this.map);
+      } else {
+        console.error('Invalid coordinates:', lngLat);
+      }
     }
   }
 };
